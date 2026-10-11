@@ -1,0 +1,5 @@
+# Extra packages for Google Colab (torch, numpy, matplotlib and scikit-learn are preinstalled)
+pandas==2.3.3
+livelossplot
+torchinfo
+denseweight

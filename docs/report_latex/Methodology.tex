@@ -1,0 +1,134 @@
+
+
+\subsection{Baseline Model Description}
+The reservoir model used to generate the hydrogen storage dataset is adapted from the research by \citet{Hogeweg_Benchmark}. The reservoir model is a grid with a semi-artificial geological structure. The reservoir's porosity and permeability are distributed heterogenously and designed to represent sandstone formations found in Northern Germany. It is discretised into a 61 x 61 x 12 grid. Each individual grid block is 50m in the x and y directions with varying height. \citet{Hogeweg_Benchmark} use two schedules in their study; a conversion from a natural gas storage site to underground hydrogen storage and regular operations. In this study, the conversion schedule is kept initially and the operational schedule is adapted, which is described later. 
+
+\subsection{Natural Gas Data}
+The operational schedules in this study use data from existing natural gas storage sites as an analogue for the hydrogen storage schedules. The data was collected from the Aggregated Gas Storage Inventory, using historical data until 08/06/2026. The data was collected from 29 storage sites from across Europe \citep{AGSI_data}. The monthly mean injection and withdrawal was calculated for each site. This was the most robust method; averaging over smaller periods led to longer-term trends being broken up by outlier days. Any cycle lengths with less than two occurrences were dropped. The different cycle types, injection, withdrawal and idle, were then normalised between zero and one using min-max normalisation. The injection and withdrawal rates were normalised together using min-max normalisation. This was done to keep the relative relationship between them.
+
+Tests were done to assess any correlations which would determine the schedule generation method. There was no correlation between cycle length and subsequent cycle length and no correlation between the injection or withdrawal rate and the stage in the relevant cycle. The rates were split into 3 groups for both injection and withdrawal cycle types, giving a total of 6. The 3 groups were based on the normalised cycle position with the splits representing the start, middle and end of an injection or withdrawal cycle. Although no correlation was found, the distribution of the split groups was statistically different (Table \ref{tab:combined_stats_ks}). 
+
+
+\begin{table}[htbp]
+    \centering
+    \renewcommand{\arraystretch}{1.25}
+    \begin{tabular}{c c c c c c c c}
+    \toprule
+    \multirow{2}{*}{\textbf{Cycle Position}} & \multirow{2}{*}{\textbf{Mean}} & \multirow{2}{*}{\textbf{Median}} & \multirow{2}{*}{\textbf{STD}} & \multicolumn{2}{c}{$\mathbf{0.33 < x \leq 0.66}$} & \multicolumn{2}{c}{$\mathbf{0.66 < x \leq 1.0}$} \\
+     & & & & KS Stat & P-Value & KS Stat & P-Value \\
+    \midrule
+    \multicolumn{8}{l}{\textbf{Injection}} \\
+    \midrule
+    $0 \leq x \leq 0.33$   & 0.696 & 0.680 & 0.129 & X      & X      & X     & X    \\
+    $0.33 < x \leq 0.66$   & 0.766 & 0.770 & 0.138 & 0.234  & 0.00   & X     & X    \\
+    $0.66 < x \leq 1.0$    & 0.709 & 0.697 & 0.138 & 0.0699 & 0.0869 & 0.205 & 0.00 \\
+    \midrule
+    \multicolumn{8}{l}{\textbf{Withdrawal}} \\
+    \midrule
+    $0 \leq x \leq 0.33$   & 0.425 & 0.434 & 0.157 & X     & X    & X     & X    \\
+    $0.33 < x \leq 0.66$   & 0.308 & 0.297 & 0.183 & 0.308 & 0.00 & X     & X    \\
+    $0.66 < x \leq 1.0$    & 0.382 & 0.389 & 0.176 & 0.14  & 0.00 & 0.184 & 0.00 \\
+    \bottomrule
+    \end{tabular}
+    \caption{Summary statistics and Kolmogorov-Smirnov (K-S) test results indicating statistically different distribution. Note the start and end injection distributions were not statistically different. However, for the purpose of generating a hydrogen storage dataset that emulated the natural gas cycles, this would not have a significant impact.}
+    \label{tab:combined_stats_ks}
+\end{table}
+
+
+\subsection{Dataset Generation}
+
+To generate the hydrogen storage cycle lengths, latin hypercube sampling was used to generate samples across a uniform distribution. This was then transformed to match the distribution of the normalised injection or withdrawal cycle length distribution.  The same method was applied to generate the idle cycle lengths. The number of idle samples to generate was calculated by finding the probability of an idle cycle after an injection or withdrawal cycle.
+
+The same method of generating samples was used to get the injection and withdrawal rate values. This method was used for the 6 rate distributions defined from the natural gas data. The number of samples generated for each distribution matched the number of corresponding points in the synthetic cycle lengths dataset. The generated rates were added to the synthetic injection and withdrawal cycles. 
+
+The hydrogen storage dataset had 1043 individual sites. Each site had a minimum 120 months. For this study one individual point represents one month, defined as 30 days. A maximum rate of injection and withdrawal was defined as the rate used in the baseline model by \citet{Hogeweg_Benchmark}. This maximum rate was multiplied by the synthetic rates. Wellbore hole pressure limits were added to avoid overpressure and leakage of injected hydrogen. The maximum wellbore hole pressure was set at 102 bar and the minimum was set at 96.5 bar. These values are the limits seen during the regular operating schedule in the baseline model. For each month an Eclipse script was generated incorporating these values and limits, the individual month scripts were then concatenated to create one script per site. The 1043 site scripts were then ran on Eclipse E300 and the fluid injection composition was 100\% hydrogen. 
+
+\subsection{Preprocessing of Surrogate Model Inputs}
+\subsubsection{Processing of Eclipse Simulation Results}
+
+For each site the dataset was cut to 120 timesteps from after the baseline model transition from natural gas storage to underground hydrogen storage. The first output of each month was selected. This is necessary due to Eclipse outputting a varying amount of smaller timesteps for each inputted month. For the individual grid cell data, the hydrogen saturation and pressure were selected. Hydrogen saturation was calculated as the gas saturation multiplied by the vapour component mole fraction of hydrogen. The corresponding summary file of scalar outputs was then selected.
+
+\subsubsection{Model Inputs and Outputs}
+Two spatial components and seven scalar components were inputted to the model. The model then outputted two spatial components and 3 scalar components (Table \ref{tab:model_inputs_outputs}). This resulted in 124,117 input and target pairs. These were split into train, validation and test groups. A random split of 0.7, 0.15 and 0.15 was used for the groups respectively. The spatial inputs were inputted once at the top of the model. The scalar inputs were inputted to the model within each FiLMConv Layer (fig. \ref{fig:Model_architecture}).  
+
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{ccc}
+    \toprule
+    \textbf{Variable} & \textbf{Time} & \textbf{Type} \\
+    \midrule
+    \multicolumn{3}{l}{\textbf{Input}} \\
+    \midrule
+        $H_2$ Saturation & t & Spatial \\
+         Pressure & t & Spatial \\
+         Eclipse Input Injection Rate & t & Scalar \\
+         Eclipse Input Withdrawal Rate & t & Scalar\\
+         Injection Wellbore Hole Pressure & t & Scalar\\
+         Withdrawal Wellbore Hole Pressure & t & Scalar\\
+         Idle Wellbore Hole Pressure & t & Scalar \\
+         Hydrogen Stored & t & Scalar\\
+         Month & t & Scalar\\
+    \midrule
+    \multicolumn{3}{l}{\textbf{Output}} \\
+    \midrule
+    $H_2$ Saturation & t+1 & Spatial \\
+     Pressure & t+1 & Spatial \\
+     Eclipse Output Injection Rate & t+1 & Scalar \\
+     Eclipse Output Withdrawal Rate & t+1 & Scalar\\
+     Hydrogen Stored & t+1 & Scalar \\
+     \bottomrule
+    \end{tabular}
+    \caption{Summary of Model Input and Outputs. Note the eclipse output rates are the rates which have been adjusted automatically to comply with wellbore hole pressure limits. They are therefore the average injection or withdrawal rate during the transition from time=t to time=t+1.}
+    \label{tab:model_inputs_outputs}
+\end{table}
+
+\subsubsection{Data Normalisation}
+The spatial pressure values were scaled using min-max normalisation. The hydrogen saturation was not scaled due to values already being between zero and one. All input and output scalars were transformed to between zero and one using min-max normalisation, except for input rates as they were already in this range. For wellbore hole pressure, the minimum and maximum values were preset to 96.5 and 102, the wellbore hole pressure limits set in the eclipse simulation. Due to this, the idle wellbore hole pressure component is added as normalising the wellbore hole pressure with these values leads to errors. The idle wellbore hole component is one-hot encoded to indicate if it is an idle period explicitly. 
+
+\subsection{Model Design and Evaluation Methods.}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.99\linewidth]{Figures/Model_architecture_final.pdf}
+    \caption{Model Architecture used for all predictions}
+    \label{fig:Model_architecture}
+\end{figure}
+
+\subsubsection{Model Hyperparameters and Architecture}
+The architecture of the model can be seen in Figure \ref{fig:Model_architecture}. The final model architecture presented was developed from a trial and error process. Feature-wise linear modulation and adaptive average pooling was added to the standard U-Net architecture. This was added and adapted from the research of \citet{FiLM_UFNO} and \citet{cui2025efficient}. Feature-wise linear modulation was added to every convolution block to give the scalar inputs a larger impact.  
+
+The U-Net architecture was used as it allows for large scale features to be retained through skip connections. Finer scalar features can be extracted through the gradual decrease in the dimensions in the encoder and decoder blocks. Other architectures were considered such as long short-term memory models which have been shown to be valuable for predicting withdrawal rate \citep{H2storeoptim}. Long short-term memory models in this context allow information from previous months to be passed forward. However, this means the model user (i.e the hydrogen storage operator) must have information from previous cycles to make a prediction. By using the architecture in Figure \ref{fig:Model_architecture} the user is only required to have the information for one point in time. Feature-wise linear modulation was also added due to the reduction in gas saturation error observed by \citet{FiLM_UFNO}.
+
+The model was trained with a batch size of 32. Weight decay was applied to avoid overfitting and a cosine scheduler was used due to unstable training in earlier models. The loss function was a equally weighted combination due to the models 5 outputs. For the two spatial predictions relative loss function was used \citep{mao2025deep}. The loss function used for the moles stored output was mean square error. For injection and withdrawal DenseLoss was used \citep{steininger2021density}. The DenseLoss was adapted to not account for values of zero. This was done as they are either idle phases or the alternate phase of injection or withdrawal.
+
+\subsubsection{Model Prediction and Evaluation}
+To evaluate the model performance, the $R^2$ and mean absolute percentage error were calculated for the scalar outputs. The mean absolute percentage error was calculated to allow for comparison between the scalars. The plume saturation error and pressure relative error were calculated for the hydrogen saturation and pressure spatial predictions \citep{gegewen_nested}. The mean error was also calculated for both spatial predictions at the final month of every site for each individual grid cell. These errors were all calculated using teacher-forced rollout; meaning the input to generate a prediction is from the ground-truth Eclipse simulation results. 
+
+Further evaluation was carried out by assessing the impact of predictions from autoregressive rollout. This method used some of the outputs of the previous timestep to generate the next prediction. The hydrogen stored, hydrogen saturation and pressure predictions from time=t were then used as input to predict at t=t+1. The other input variables such as injection and withdrawal rate and wellbore hole pressure were inputted using the ground truth variables. These are referred to as the conditioning variables. To evaluate these predictions absolute percentage error of all the model outputs was calculated. 
+
+The results for both methods were calculated exclusively on the unseen test dataset. The predictions are made by the model after being trained for 90 epochs where the validation loss plateaued. The cycle lengths and operational rates within the test set are summarised in Table \ref{tab:test_cycle_lengths}.
+
+This method would be highly valuable for an operator of a hydrogen storage site and user of the model. The autoregressive rollout would allow an operator to predict behaviour beyond a single timestep from one single sample of data. 
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{lcccccc}
+         \toprule
+         & \multicolumn{3}{c}{\textbf{Cycle Length}} & \multicolumn{3}{c}{\textbf{Rate}} \\
+        \midrule
+        \textbf{Phase} & Maximum & Minimum & Median & Maximum & Minimum & Median \\
+        \midrule
+        Injection & 11 & 1 & 6 & 1.000 & 0.335 & 0.713 \\
+        Withdrawal & 10 & 1 & 5 & 0.840 & 0.007 & 0.372 \\
+        Idle & 6 & 1 & 2 & X & X & X \\
+        \bottomrule
+    \end{tabular}
+    \caption{Summary statistics of cycle lengths and operational rates in the unseen test set}
+    \label{tab:test_cycle_lengths}
+\end{table}
+
+ 
+
+
+

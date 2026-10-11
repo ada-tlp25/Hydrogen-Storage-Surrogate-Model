@@ -1,0 +1,17 @@
+# This script runs the get static grid python script. It is ran seperately as the grid doesn't change for any of the sites.
+# However, this same script could be used exactly the same to get the static grid properties if they were to change between sites.
+
+#!/bin/bash
+#PBS -N UNRST_convert
+#PBS -l walltime=00:30:00
+#PBS -l select=1:ncpus=1:mem=8gb
+#PBS -o logs/convert_^array_index^.out
+#PBS -e logs/convert_^array_index^.err
+
+cd /rds/general/user/tlp25/ephemeral/synthetic_cycles/Simulation_Cases
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate IRP_env
+
+DATA_FILE=$(sed -n "${PBS_ARRAY_INDEX}p" data_files.txt)
+
+python -c "from unrst_loader import get_static_grid_pkl; get_static_grid_pkl('${DATA_FILE}')"

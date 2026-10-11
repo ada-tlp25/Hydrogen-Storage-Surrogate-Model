@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# OS
+.DS_Store
+*:Zone.Identifier
+
+# LaTeX build files
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# Model / simulation outputs
+Results/
+*.pt
+*.pth
+*.UNRST
+*.UNSMRY

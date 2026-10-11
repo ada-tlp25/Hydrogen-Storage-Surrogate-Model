@@ -1,0 +1,23 @@
+# This file runs all of the schedule files that are run on the Imperial HPC CX3 cluster.
+# The script was adapted from one provided by Gareth Oliver (Imperial College ESE Computing and Data Manager) for running eclipse simulations.
+
+#!/bin/bash
+#PBS -l select=1:ncpus=2:mem=4gb:filesystem_type=gpfs
+#PBS -l walltime=05:00:00
+#PBS -N eclipse
+#PBS -J 1-1043
+
+module purge
+module load Eclipse/2024.2
+
+cd "/rds/general/user/tlp25/ephemeral/synthetic_cycles/Simulation_Cases"
+
+THIS_FILE=$(sed -n "${PBS_ARRAY_INDEX}p" data_files.txt) # written with the help of Anthropic's Claude;
+                                                         # it prints the seperate script names which are in data_files.txt
+                                                         # they correspond to the PBS array index and the line number in data_files.txt
+
+date
+
+eclrun e300 "$THIS_FILE"
+
+date

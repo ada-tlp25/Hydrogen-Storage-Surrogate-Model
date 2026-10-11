@@ -1,0 +1,95 @@
+\documentclass[12pt]{article}
+\usepackage{graphicx}
+\usepackage[authoryear]{natbib}
+\usepackage{rotating}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{subcaption}
+\usepackage{placeins}
+\usepackage{amsmath}
+\usepackage{stfloats}
+\usepackage{caption}
+\usepackage{pdflscape}
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage{placeins}
+\usepackage{parskip}
+\usepackage[
+    a4paper,
+    top=2cm,
+    bottom=2.5cm,
+    left=2cm,
+    right=2cm
+]{geometry}
+\usepackage{float}
+
+\newgeometry{margin=2cm}
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+    \vspace*{\fill}
+
+    {\large\bfseries Developing a Surrogate Model for Underground Hydrogen Storage using Deep Learning.\par}
+    \vspace{0.3cm}
+    {\Large\itshape Report\par}
+    \vspace{0.5cm}
+    {\normalsize\bfseries Thomas Peach\par}
+    {\small\itshape MSc Geo-Energy with Machine Learning and Data Science\par}
+    {\small\itshape https://github.com/ese-ada-lovelace-2025/irp-tlp25\par}
+
+    \vspace*{\fill}
+
+    Supervised by:\\[0.3cm]
+    {\normalsize\bfseries Prof. Samuel Krevor\par}
+    {\small\itshape Primary Supervisor\par}
+    \vspace{0.5cm}
+    {\normalsize\bfseries Dr. Adriana Paluszny\par}
+    {\small\itshape Secondary Supervisor\par}
+
+    \vspace*{\fill}
+
+    \includegraphics[width=0.4\textwidth]{IC_New_Logo.pdf}\\
+    \vspace{0.5cm}
+    {\normalsize Department of Earth Sciences and Engineering\par}
+    {\normalsize Imperial College London\par}
+    {\normalsize \today\par}
+
+    {\normalsize Word Count = 4980}
+
+    \vspace*{\fill}
+    \end{center}
+\end{titlepage}
+
+\newpage
+
+\section{AI Acknowledgements}
+\input{AI_Acknowledgements}
+
+\section{Abstract}
+\input{Abstract}
+
+\section{Introduction}
+\input{Introduction}
+
+\section{Methodology}
+\input{Methodology}
+
+\section{Results}
+\input{Results}
+
+\section{Discussion}
+\input{Discussion}
+
+\section{Conclusion}
+\input{Conclusion}
+
+
+\bibliographystyle{apalike}
+\bibliography{references}
+
+\appendix
+\input{Appendix}
+
+\end{document}

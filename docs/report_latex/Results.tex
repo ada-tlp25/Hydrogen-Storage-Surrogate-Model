@@ -1,0 +1,127 @@
+\subsection{Natural Gas}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/cycle_length_distribution_by_country_and_phase.png}
+    \caption{Distributions of injection, withdrawal and idle cycle lengths by Country}
+    \label{fig:NG_cycles_distribution}
+\end{figure}
+
+The lengths of the different cycle types vary significantly across the countries studied (fig \ref{fig:NG_cycles_distribution}). Injection cycles have the most variable length within a single country with the largest interquartile range, seen in Italy. Median injection cycle lengths have limited variability across all the countries. All the median cycle lengths are five or six months, with the exception of the United Kingdom. The median injection cycle length in the United Kingdom is the shortest across all countries. In Italy there is the largest disparity between the median injection and withdrawal cycle lengths, with the withdrawal median cycle length being the lowest. Withdrawal cycle lengths vary the most out of the cycle types across all the countries with the largest range of median cycle lengths.  Withdrawal cycles are most likely to have anomalous cycle lengths indicated by the highest number of outliers. Idle phases are least variable with the largest interquartile range being 2 months, observed in the Netherlands and Romania. Idle cycles are not present in all countries. 
+
+\subsection{Prediction of Scalar Values}
+
+\begin{figure}[H]
+     \centering
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Injection_scatter.png}
+         \caption{True injection rate plotted against predicted rate.}
+         \label{fig:inj_scatter}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Withdrawal_scatter.png}
+         \caption{True withdrawal rate plotted against predicted rate.}
+         \label{fig:Withdrawal_Scatter}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Moles_stored_scatter.png}
+         \caption{True hydrogen stored plotted against predicted hydrogen stored.}
+         \label{fig:inplace_scatter}
+     \end{subfigure}
+        \caption{True vs predicted scatter plots for all scalar outputs. Note injection and withdrawal rates are displayed in kilogram-moles per day and hydrogen stored is kilogram-moles.}
+        \label{fig:true_vs_pred_scalars}
+\end{figure}
+\FloatBarrier
+The model shows a varying ability to predict the three scalar variables (fig. \ref{fig:true_vs_pred_scalars}). The true and predicted values for injection rate show strong alignment with an $R^2$ value of 0.978. For true injection rates greater than $10 \times10{^3} \ (kg  \cdot M) / D$ the predictions become less accurate (fig. \ref{fig:inj_scatter}). The model shows a poor ability to predict withdrawal rate with an $R{^2}$ value of 0.066. The mean absolute percentage reinforces the high inaccuracy of the model (fig. \ref{fig:Withdrawal_Scatter}). The model predicts the hydrogen stored with the highest accuracy. Despite a similar $R^2$ value to injection rate, the predictions do not significantly deviate from the perfect prediction line. The higher accuracy is highlighted most clearly by the mean absolute percentage error being 0.649 (fig. \ref{fig:inplace_scatter}).
+
+\FloatBarrier
+\subsection{Spatial Prediction}
+
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Sat_diverging_bar_units_fixed.png}
+        \caption{Saturation Prediction Errors}
+        \label{fig:diverging_sat}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Pressure_diverging_fixed_final_final.png}
+        \caption{Pressure Prediction Errors}
+        \label{fig:Pressure_diverging}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/horz_perm_final_2.png}
+        \caption{Reservoir Horizontal Permeability}
+        \label{fig:Horizontal_perm}
+    \end{subfigure}
+    \caption{Diverging colourmap of spatial variables errors. Note the figures are done with a vertical exaggeration of 10.}
+    \label{fig:Diverging_figs}
+\end{figure}
+
+The model's prediction of saturation is highly accurate with the maximum error being 1.6\%. This is reinforced by the plume saturation error being 0.33\%. The highest errors seen are closest to the well, overpredicting the saturation (fig. \ref{fig:diverging_sat}). At the base of the anticline, saturation is underpredicted; however, the size of the underprediction is low. The model predicts the pressure with high accuracy. The errors are not as concentrated as the saturation errors. The maximum error of all grid cells in the test set is 0.26\% and the pressure relative error is 0.14\%. In the north-east corner of the reservoir, there is an area of underpredicted errors (Fig. \ref{fig:Pressure_diverging}).
+
+\FloatBarrier
+\subsection{Autoregressive Rollout}
+
+\begin{figure}[H]
+     \centering
+     \begin{subfigure}[b]{0.8\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Inj_autoreg_plot.png}
+         \caption{Comparison of absolute percentage error between teacher-forced rollout (blue) and autoregressive rollout for injection rates (red).}
+         \label{fig:Inj_auto_plot}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.8\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/With_autoreg_plot.png}
+         \caption{Comparison of absolute percentage error between teacher-forced rollout (blue) and autoregressive rollout for withdrawal rates (red).}
+         \label{fig:with_auto_plot}
+     \end{subfigure}
+        \caption{Comparison of errors between teacher-forced rollout and autoregressive rollout. Note the shaded areas in both images are the interquartile range.}
+        \label{fig:Auto_inj_and_with}
+\end{figure}
+The results of the autoregressive rollout for injection and withdrawal rates show errors of the same order of magnitude as the teacher-forced rollout at a lower number of months (fig. \ref{fig:Auto_inj_and_with}). The autoregressive rollout injection predictions track the teacher-forced rollout with very small deviation up to month 10. The interquartile range of the autoregressive rollout predictions is a maximum absolute percentage error of 5\%. After this period, the median increases to a peak before then decreasing and fluctuating with a constant amplitude. The interquartile range follows a similar trend before increasing to a maximum absolute percentage error of 100\% when the median fluctuates (fig. \ref{fig:Inj_auto_plot}). The error of autoregressive rollout withdrawal rate predictions do not follow the same trend. The autoregressive rollout withdrawal predictions have approximately the same error as the teacher forced withdrawal rate predictions across the full study period (fig. \ref{fig:with_auto_plot}). 
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Inplace_autoreg_plot_ape.png}
+        \caption{Hydrogen stored prediction errors.}
+        \label{fig:inplace_auto}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Pressure_autoreg_plot_ape.png}
+        \caption{Pressure prediction errors.}
+        \label{fig:Pressure_auto}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.8\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Saturation_autoreg_plot_ape.png}
+        \caption{Saturation prediction errors}
+        \label{fig:Saturation_auto}
+    \end{subfigure}
+    \caption{Comparison of prediction errors from teacher forced (blue) and autoregressive (red) rollout over time. Note the error band in all images is the interquartile range.}
+    \label{fig:inpl_press_sat_ar}
+\end{figure}
+
+The autoregressive rollout errors from hydrogen stored predictions show a non-linear trend which deviates significantly from the teacher-forced error predictions. The error increases initially before decreasing and then gradually rising. The error then decreases until month 90 before increasing again (fig \ref{fig:inplace_auto}). The autoregressive rollout pressure prediction error follows a similar trend to the hydrogen stored error. However, at month 85 the trends diverge. The pressure error increases to its maximum which occurs at month 110 (fig. \ref{fig:Pressure_auto}). The interquartile range rapidly increases initially for both hydrogen stored and pressure variables; however, after this it remains constant. The saturation error does not follow this same trend. The saturation error median and interquartile range increase smoothly the entire time.(fig. \ref{fig:Saturation_auto}).
+
+
+\FloatBarrier
+
+

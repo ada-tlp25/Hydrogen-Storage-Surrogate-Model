@@ -1,0 +1,17 @@
+# This script runs a python script which returns the results of the simulation in the format wanted.
+# This script was adapted from the Run_all.txt file with the help of Anthropic's Claude.
+
+#!/bin/bash
+#PBS -N UNRST_convert
+#PBS -l walltime=00:30:00
+#PBS -l select=1:ncpus=1:mem=4gb
+#PBS -o logs/convert_^array_index^.out
+#PBS -e logs/convert_^array_index^.err
+
+cd /rds/general/user/tlp25/ephemeral/synthetic_cycles/Simulation_Cases
+source ~/miniforge3/etc/profile.d/conda.sh
+conda activate IRP_env
+
+DATA_FILE=$(sed -n "${PBS_ARRAY_INDEX}p" data_files.txt)
+
+python -c "from unrst_loader import convert_UNRST_to_pkl; convert_UNRST_to_pkl('${DATA_FILE}')"

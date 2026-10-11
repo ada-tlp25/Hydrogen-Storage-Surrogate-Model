@@ -1,0 +1,145 @@
+\subsection{Natural Gas Data}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/cycle_length_distribution_by_country_and_phase.png}
+    \caption{Distributions of injection, withdrawal and idle cycle lengths by Country}
+    \label{fig:NG_cycles_distribution}
+\end{figure}
+
+\subsubsection{Natural Gas Data Results}
+The lengths of the different cycle types varies significantly across the countries studied (fig \ref{fig:NG_cycles_distribution}). Injection cycles have the most variable length within a single country with the largest interquartile range, seen in Italy. Italy also has the longest cycle length. Median injection cycle lengths do not vary much across all the countries. Injection cycles in Slovakia are the least consistent with the highest number of outliers. All the median cycle lengths are five or six months, with the exception of the United Kingdom. The median injection cycle length in the United Kingdom are  shortest across all countries. In Italy there is the largest disparity between the median injection and withdrawal cycle lengths, with the withdrawal median cycle length being the lowest. Withdrawal cycle lengths vary the most out of the cycle types across all the countries with the largest range of median cycle lengths.  Withdrawal cycles are also most likely to have anomalous cycle lengths indicated by the highest number of outliers. Idle phases are least variable with the largest interquartile range being 2 months, observed in the Netherlands and Romania. Idle cycles are also not present in all countries (fig. \ref{fig:NG_cycles_distribution}). 
+
+
+\subsubsection{Natural Gas Data Discussion}
+The results of the natural gas data analysis highlight the need for using varying cycle lengths in the development of surrogate models for underground hydrogen storage. The variations in cycle lengths across Europe are likely due to variations in the reservoir properties of the natural gas storage sites, market demands, operational models and varying seasons. The six month idle phases observed in the Netherlands are due to the site being at maximum capacity \citep{AGSI_data}. The withdrawal cycle median being lowest in Italy is potentially due to having a shorter winter period. This is typically  when gas is produced to meet increased market demand. Seasonal variations across the different countries potentially explains the observation that the median injection cycle length is lowest in the United Kingdom. The summer months are generally when gas is injected. As a result, the United Kingdom having a shorter summer period would explain the shorter injection cycle lengths. Another explanation for the low median withdrawal cycle length is the reservoir properties of the undergound gas storage site Cornegliano. This site is the only natural gas storage site in Italy used in this study and it has the lowest total gas capacity of all sites \citep{AGSI_data}. This may result in rapid depletion of the storage and shorter withdrawal lengths. A final explanation is the site's operational model and data quality. The site uses a '5+2' operational model during the withdrawal season in winter. This model means the site withdraws gas for five days during the week and injections gas for two days at the weekend \citep{Italy_UGS}. Therefore, if injection outweighs the withdrawal capacity the withdrawal periods may appear much shorter. This operational model is designed to optimize storage operations. 
+
+The results and analysis highlight the significant variations in cycle lengths and the multiple variables. This reinforces the idea that this is a strong use case of deep learning to develop a surrogate model. Due to the cycle lengths being highly variable, training a deep learning surrogate would allow for rapid assessment of the wide-range of uncertainties which are caused by multiple variables. The cyclic nature of underground hydrogen storage means deep learning models can be trained to assess these uncertainties once and then used multiple times. Although not clearly distinguishable in the data analysis, this rapid assessment of uncertain cycle lengths would be invaluable when outlier events occur. Outlier events such as the invasion of Ukraine and Covid-19, can have a large impact on demand for energy. Being able to assess the impacts would be crucial. 
+
+\subsection{Surrogate Model Results}
+
+\subsubsection{Prediction of Scalar Values Results}
+
+\begin{figure}[H]
+     \centering
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Injection_scatter.png}
+         \caption{True injection rate plotted against predicted rate.}
+         \label{fig:inj_scatter}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Withdrawal_scatter.png}
+         \caption{True withdrawal rate plotted against predicted rate.}
+         \label{fig:Withdrawal_Scatter}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.48\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Moles_stored_scatter.png}
+         \caption{True hydrogen stored plotted against predicted hydrogen stored.}
+         \label{fig:inplace_scatter}
+     \end{subfigure}
+        \caption{True vs predicted scatter plots for all scalar outputs.}
+        \label{fig:true_vs_pred_scalars}
+\end{figure}
+\FloatBarrier
+The model shows a varying ability to predict the three scalar variables (fig. \ref{fig:true_vs_pred_scalars}). The true and predicted values for injection rate show strong alignment with an $R^2$ value of 0.978. For true injection rates greater than $10 \times10{^3} \ (KG  \cdot M) / D$ the predictions become less accurate \ref{fig:inj_scatter}. For withdrawal rate the model shows a poor ability to predict with an $R{^2}$ value of 0.066. The model makes slightly better prediction from 0 to 4 $\times 10{^3} \ (KG \cdot M) / D$ with some clustering around the perfect prediction line. The mean absolute percentage reinforces the high inaccuracy of the model (fig. \ref{fig:Withdrawal_Scatter}). The model predicts the hydrogen stored with the highest accuracy. Despite a similar $R^2$ value to injection rate, the predictions do not significantly deviate from the perfect prediction line. The higher accuracy is highlighted most clearly by the mean absolute percentage error being 0.649 (fig. \ref{fig:inplace_scatter})
+
+\subsubsection{Prediction of Scalar Values Discussion}
+
+The prediction of injection rates is mostly very accurate. The accuracy drops above 10 $\times 10{^3} \ (KG \cdot M / D)$. This is likely due to their being less data points in this range. Other model architectures and hyperparameters were tested out and showed lower accuracy. Due to the observation of inaccuracy due to limited data points, the DenseLoss function developed by \citet{steininger2021density} was implemented. This resulted in the highest accuracy of all architectures and hyperparameters. The ability of the model to predict withdrawal rate is significantly lower than injection rate predictions. The $R^2$ value is only slightly better than predicting the mean. An explanation for this is that wellbore hole pressure changes much faster during withdrawal than injection, this can be seen in Appendix \ref{Appendix:WBHP_box}. This may result in eclipse simulation switching to wellbore hole pressure controlled for a higher percentage of withdrawal cycles compared to injection. Therefore, the model may struggle to learn this. To try and limit the impact of this, the three wellbore hole pressure components were added; however, had a limited impact. The hydrogen stored component was also added to the scalar inputs to try and address this issue. The model predicts the amount of hydrogen stored with high accuracy. This is unexpected due to the models weak ability to predict withdrawal rate. The most plausible explanation for this is the difference in scales. The hydrogen stored prediction will not be effect much if the model learns to decrease during a withdrawal phase by the mean amount. Despite the values being normalised the difference in scales will have an impact. As the hydrogen stored is predicted independently, it will learn the withdrawal rate implicitly and the effects of it in relation to its own scale. 
+\FloatBarrier
+\subsubsection{Spatial Prediction Results}
+
+
+\begin{figure}
+    \centering
+    \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Diverging_Sat_latek.png}
+        \caption{Saturation Prediction Errors}
+        \label{fig:diverging_sat}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Pressure_diverging_bar.png}
+        \caption{Pressure Prediction Errors}
+        \label{fig:Pressure_diverging}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{Figures/Horizontal_Perm_grid.png}
+        \caption{Reservoir Horizontal Permeability}
+        \label{fig:Horizontal_perm}
+    \end{subfigure}
+    \caption{Diverging colourmap of spatial variables errors. Note the figures are done with a vertical exaggeration of 10.}
+    \label{fig:Diverging_figs}
+\end{figure}
+
+The model's prediction of saturation is highly accurate with the maximum error being 1.6\%. This is reinforced by the plume saturation error being 0.33\%. These results are the mean for all timesteps and all grid cells in the test set. The highest errors seen are closest to the well, typically over predicting the saturation (fig. \ref{fig:diverging_sat}). At the base of the anticline saturation is underpredicted; however the size of the underprediction is low. The model predicts the pressure with high accuracy. The errors are not as concentrated as those seen in the saturation error. The maximum error of all grid cells in the test set is 0.26\% and the pressure relative error is 0.14\%. In the North-East corner of the reservoir, there is an area of underpredicted errors (Fig. \ref{fig:Pressure_diverging}).
+
+\subsubsection{Spatial Prediction Discussion}
+
+The saturation errors are highest closest to the well. This observation is likely due to it being where saturation will be most variable in injection and withdrawal phases. The observation of underprediction at the base of the anticline is potentially due to it being the mean plume front. Due to the hydrogen being driven upwards, the base of the anticline will have lower saturation. As the plume front will differ for all sites the model does not learn to capture plume front physics entirely. There is also a layer of relatively high overpredictions by the well. When comparing to the horizontal permeability it can be seen that there is an area of lower permeability. The model therefore is unable to completely determine the difference in permeability and the effects of this. The pressure predictions are highly accurate. Comparing the observation of underprediction in the North-East Corner to the horizontal permeability an explanation can be hypothesised. The horizontal permeability is higher than the surrounding area and this contrast may not be learnt by the model (fig. \ref{fig:Horizontal_perm}). Overall, the pressure predictions, although errors appearing wide-spread, are highly accurate. This error in both saturation prediction and pressure prediction could likely be enhanced by inputting the reservoir properties into the model. However, this is unnecessary due to the high accuracy and the increase in compute capacity it would require.
+\FloatBarrier
+\subsection{Autoregressive Rollout Results}
+
+\begin{figure}[H]
+     \centering
+     \begin{subfigure}[b]{0.7\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Inj_autoreg_plot.png}
+         \caption{Comparison of absolute percentage error between teacher-forced rollout and autoregressive rollout for injection rates.}
+         \label{fig:Inj_auto_plot}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.7\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/With_autoreg_plot.png}
+         \caption{Comparison of absolute percentage error between teacher-forced rollout and autoregressive rollout for withdrawal rates.}
+         \label{fig:with_auto_plot}
+     \end{subfigure}
+        \caption{Comparison of errors between teacher-forced rollout and autoregressive rollout. Note the error band in both images is the interquartile range.}
+        \label{fig:Auto_inj_and_with}
+\end{figure}
+The results of the autoregressive rollout for injection and withdrawal show errors of the same order of magnitude as the teacher-forced rollout at a lower number of months (fig. \ref{fig:Auto_inj_and_with}). The autoregressive rollout injection predictions up to month 10, track the teacher-forced rollout with very small deviation. The interquartile range of the autoregressive rollout predictions is a maximum absolute percentage error of 5\%. After this period the median and interquartile range increases up to month 70. The absolute error then decreases until approximately month 90. The median absolute percentage error then fluctuates; however, the interquartile range increases to a maximum absolute percentage error of 100\% (fig. \ref{fig:Inj_auto_plot}). The error of autoregressive rollout withdrawal rate predictions do not follow the same trend. The autoregressive rollout withdrawal predictions have approximately the same error as the teacher forced withdrawal rate predictions across the full study period (fig. \ref{fig:with_auto_plot}). 
+
+\begin{figure}
+     \centering
+     \begin{subfigure}[b]{0.8\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Inplace_MSE_plot.png}
+         \caption{Hydrogen stored prediction errors.}
+         \label{fig:inplace_auto}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.8\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Pressure_MSE_plot.png}
+         \caption{Pressure prediction errors.}
+         \label{fig:Pressure_auto}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.8\textwidth}
+         \centering
+         \includegraphics[width=\textwidth]{Figures/Saturation_MSE_plot.png}
+         \caption{Saturation prediction errors}
+         \label{fig:Saturation_auto}
+     \end{subfigure}
+        \caption{Comparison of prediction errors from teacher forced and autoregressive rollout over time.}
+        \label{fig:inpl_press_sat_ar}
+\end{figure}
+
+The results of the autoregressive rollout hydrogen stored prediction errors show a non-linear trend which deviates significantly from the teacher-forced error predictions. The error increases up to month 20 before plateauing until month 40. The error then rises rapidly to a peak at approximately month 65. The error then decreases until month 90 before increasing again until the final month (fig \ref{fig:inplace_auto}). The pressure autoregressive rollout prediction error follows a similar trend to the hydrogen stored autoregressive rollout prediction error. However, at month 85 the trends diverge. The pressure autoregressive rollout error increases to its maximum which occurs at month 110 (fig. \ref{fig:Pressure_auto}). The saturation error does not follow this same trend. The saturation autoregressive rollout prediction error increases linearly until month 60. The error rate then plateaus until month 80 before increasing to the maximum error at month 120 (fig. \ref{fig:Saturation_auto}).
+
+The results of the injection rate autoregressive rollout predictions potentially give us an understanding of the key input variables to the model. The observation that the error increases up to month 70 loosely aligns with observations seen in the hydrogen stored and pressure autoregressive rollout results. This implies that these three variables receive and react to similar input signals resulting in errors propagating through these variables. The interquartile range significantly increasing after month 90 potentially indicates the results have gone significantly outside the model's training parameter space. The withdrawal rate autoregressive rollout prediction errors show no clear link to the autoregressive rollout inputs. This is not unexpected due to the results of the teacher-forced prediction being poor. This highlights potentially why the withdrawal rate predictions have low accuracy. The model does not receive enough information from the current inputs to make accurate predictions. Therefore cumulative errors in the AR inputs do not propagate through to the withdrawal rate autoregressive rollout predictions. The saturation autoregressive rollout prediction error does not follow a trend shown by other variables. This result implies it solely depends on the conditioning variables which are independent of the autoregressive rollout predictions. A more speculative hypothesis is that the saturation autoregressive rollout predictions have the highest importance. The saturation error increases smoothly which implies the prediction is not impacted by multiple variables. The key evidence for this hypothesis is the error plateauing between month 60 and month 80. The injection rate, hydrogen stored and pressure errors during this period decrease. These errors may decrease when the saturation is in this range as the model has learnt to give stronger weighting to the conditioning variables resulting in error decreasing. After this period the saturation predictions may be outside of the parameter space. This is a highly speculative hypothesis which requires further investigation in the future. Overall, the model predictions from autoregressive rollout have a low error rate up to 15 months for injection rate, hydrogen stored, saturation and pressure. This means that operators can accurately predict and assess the impacts of injection cycles for the maximum cycle length observed in the natural gas data from one initial set of inputs. 
+\FloatBarrier
+\subsection{Limitations and Directions for Future Work}
+
+The primary limitation of this study is the model used to generate the dataset. Due to there being no existing commercial operations of underground hydrogen storage in depleted gas fields, the accuracy of the model is not able to be verified. In addition to this, the resolution of the grid cells being 50m may not fully capture the dynamics of the hydrogen plume. Although there is no existing research on the resolution required for underground hydrogen storage, using carbon capture and storage as an analogue, resolutions of one to two metres are required \citep{gegewen_nested}. 
+
+Future work should primarily focus on improving the accuracy of predicting withdrawal rate, the key value for forecasting deliverability. One method to explore to solve this would be using a much finer temporal resolution. This would likely reduce the impact of large wellbore hole pressure changes, which is potentially causing the prediction to be inaccurate. Investigating the impacts of higher temporal resolution on autoregressive rollout predictions is also an interesting avenue to explore in future. A final, and most valuable, avenue for future research would be testing autoregressive predictions on samples starting at different stages in the simulation and outside of the model's training time range. Achieving high accuracy on this is a very strong justification for developing deep learning based surrogate models. This research avenue if successful would significantly reduce compute capacity required, enable rapid-assessment and optimisation of underground hydrogen storage. 
+
