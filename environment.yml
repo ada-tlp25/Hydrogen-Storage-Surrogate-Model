@@ -190,4 +190,3 @@ dependencies:
       - werkzeug==3.1.8
       - xarray==2025.6.1
       - zipp==4.1.0
-prefix: /home/tlp25/miniconda3/envs/IRP_env
