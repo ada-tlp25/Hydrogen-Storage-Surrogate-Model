@@ -12,9 +12,6 @@ class FiLM(nn.Module):
             nn.Linear(hidden_dim, out_channels * 2)  # need gamma and beta
         )
 
-        nn.init.zeros_(self.film[-1].weight)
-        nn.init.zeros_(self.film[-1].bias)
-
         self.out_channels = out_channels
 
     def forward(self, cond):
