@@ -80,4 +80,4 @@ The project runs in three environments:
 
 ## License
 
-Released under the MIT License. See [LICENSE](LICENSE).
+Released under GPLv3 license. See [LICENSE](LICENSE).
